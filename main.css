@@ -1,0 +1,61 @@
+* {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: arial, sans-serif;
+    font-size: 12px;
+}
+
+#begin {
+    position: absolute;
+    width: 100%;
+    margin-top: calc(50vh - 40px);
+    z-index: 1000;
+    font-weight: bold;
+    font-size: 48px;
+    text-align: center;
+    pointer-events: none;
+    color: #ddd;
+    text-shadow: 3px 3px #222;
+    padding: 10px;
+}
+
+.context {
+    position: absolute;
+    min-width: 100px;
+    z-index: 1000;
+    background-color: lightgray;
+    border: 1px solid black;
+    display: none;
+    cursor: default;
+}
+.context > div {
+    padding: 5px;
+}
+
+.context .head {
+    font-weight: bold;
+    background-color: dimgray;
+    border-bottom: 1px solid black;
+    padding-right: 20px;
+}
+
+.context .close {
+    font-weight: bold;
+    position: absolute;
+    top: 0;
+    right: 0;
+    cursor: pointer;
+}
+
+.context .option {
+    cursor: pointer;
+}
+
+.context .option.first {
+    border-top: 1px solid dimgrey;
+}
+
+.context .option:hover {
+    background-color: gray;
+}
