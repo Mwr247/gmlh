@@ -83,13 +83,13 @@ function GMLH(width, height) {
     }, false);
 
     PIXI.Loader.shared.add([
-        'tiles/seamlessTextures2/IMGP5497_seamless.jpg',
+        'textures/parchment.jpg',
     ]).on('progress', (loader, resource) => {
         console.log('loading:', resource.url);
         console.log('progress:', loader.progress + '%');
     }).load(() => {
         tile = new PIXI.TilingSprite(
-            PIXI.Texture.from('tiles/seamlessTextures2/IMGP5497_seamless.jpg'),
+            PIXI.Texture.from('textures/parchment.jpg'),
             width,
             height,
         );
