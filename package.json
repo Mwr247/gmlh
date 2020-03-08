@@ -6,9 +6,13 @@
   "dependencies": {
     "pixi-filters": "^3.0.3",
     "pixi-viewport": "^4.2.3",
-    "pixi.js": "^5.1.3"
+    "pixi.js": "^5.1.3",
+    "socket.io": "^2.2.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint-config-standard": "^14.1.0",
+    "eslint-plugin-standard": "^4.0.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
