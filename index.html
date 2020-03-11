@@ -10,8 +10,9 @@
     <script type="module">
         import {DrawApp} from './drawapp.js';
         var drawApp;
+        let url = [window.location.hostname, window.location.port || '4000'].join(':');
         document.addEventListener('DOMContentLoaded', () => {
-            drawApp = new DrawApp('//mwr247.com:4000').init('drawApp', ready).playerInit('GMLH');
+            drawApp = new DrawApp(url).init('drawApp', ready).playerInit('GMLH');
         });
         
         function ready() {

@@ -17,7 +17,8 @@
         import {DrawApp} from './drawapp.js';
         document.addEventListener('DOMContentLoaded', () => {
             GMLHI = GMLH(10000, 10000);
-            drawApp = new DrawApp('//mwr247.com:4000', true).init('drawApp', ready);
+            let url = [window.location.hostname, window.location.port || '4000'].join(':');
+            drawApp = new DrawApp(url, true).init('drawApp', ready);
             GMLHI.hookStream(drawApp.tableHook());
         });
         

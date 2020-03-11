@@ -4,6 +4,7 @@
   "description": "A simple web-based virtual tabletop battlemap",
   "main": "index.js",
   "dependencies": {
+    "dotenv": "^8.2.0",
     "pixi-filters": "^3.0.3",
     "pixi-viewport": "^4.2.3",
     "pixi.js": "^5.1.3",
