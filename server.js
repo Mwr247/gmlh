@@ -29,9 +29,9 @@ const server = https.createServer(credentials, (req, res) => {
     let pathname = url.parse(req.url).pathname;
     switch (pathname) {
         case '/':
-        case '/player': pathname = 'index.html';break;
-        case '/dm': pathname = 'DM.html';break;
-        default: pathname = pathname.replace(/^\//, '');
+        case '/player': pathname = 'client/index.html';break;
+        case '/dm': pathname = 'client/dm.html';break;
+        default: pathname = 'client/' + pathname.replace(/^\//, '');
     }
     const ext = path.parse(pathname).ext;
     
