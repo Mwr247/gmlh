@@ -68,6 +68,7 @@ class Room {
         this.id = id;
         this.owner = owner;
         this.lastTable = null;
+        this.lastTableTime = null;
     }
 };
 
@@ -128,9 +129,11 @@ const io = require('socket.io')(server, {
         if (client.room != null && rooms[client.room] != null) {
             if(rooms[client.room].owner === client.id) {
                 if (cb) {cb(1);}
+                if (rooms[client.room].lastTableTime >= Date.now()) {return;}
                 delete rooms[client.room].lastTable;
                 client.to(client.room).emit('table', data);
                 rooms[client.room].lastTable = data;
+                rooms[client.room].lastTableTime = Date.now() + data.img.length / 2000;
             } else if (rooms[client.room].lastTable != null) {
                 client.emit('table', rooms[client.room].lastTable);
             }

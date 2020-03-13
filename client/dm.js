@@ -77,6 +77,7 @@ function GMLH(width, height) {
     let begin = document.getElementById('begin');
     let evtPropKill = false;
     let lastImage = Date.now() + 1000;
+    let lastImageCount = 0;
     let lastHash = '';
     let fastHash = false;
     let waiting = false;
@@ -164,20 +165,22 @@ function GMLH(width, height) {
     }
     
     function render() {
-        if (waiting === true && Date.now() > lastImage + 500) {waiting = false;}
+        if (waiting === true && Date.now() > lastImage + 250) {waiting = false;}
         if (streaming && waiting === false && Date.now() > lastImage) {
             const thisHash = hash(app.renderer.view.toDataURL('image/jpeg', 0.01));
             if (thisHash === lastHash) {
-                lastImage = Date.now() + 500;
+                lastImage = Date.now() + 250;
                 if (fastHash === true) {
                     fastHash = false;
+                    lastImageCount = 0;
                     streamHook({img: app.renderer.view.toDataURL('image/jpeg', 0.6), width: app.renderer.width, height: app.renderer.height}, wait);
                     waiting = true;
                 }
             } else {
                 fastHash = true;
-                lastImage = Date.now() + 50;
-                streamHook({img: app.renderer.view.toDataURL('image/jpeg', 0.2), width: app.renderer.width, height: app.renderer.height}, wait);
+                lastImage = Date.now() + 100;
+                lastImageCount++;
+                streamHook({img: app.renderer.view.toDataURL('image/jpeg', 1 / Math.log(lastImageCount * 100)), width: app.renderer.width, height: app.renderer.height}, wait);
                 lastHash = thisHash;
                 waiting = true;
             }
