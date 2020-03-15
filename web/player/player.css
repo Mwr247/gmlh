@@ -11,6 +11,20 @@ body {
     background: #FFFFFF;
 }
 
+#begin {
+    position: absolute;
+    width: 100%;
+    margin-top: calc(50vh - 40px);
+    z-index: 1000;
+    font-weight: bold;
+    font-size: 48px;
+    text-align: center;
+    pointer-events: none;
+    color: #ddd;
+    text-shadow: 3px 3px #222;
+    padding: 10px;
+}
+
 canvas {
     margin: 0;
     border: none;

@@ -11,10 +11,10 @@ const modules = [
 console.log('Postinstall: Copying modules');
 
 // Create modules if non-existent
-fs.mkdir('client/modules', {recursive: true}, error => {
-    // Copy necessary node_modules to client folder
+fs.mkdir('web/modules', {recursive: true}, error => {
+    // Copy necessary node_modules to web folder
     modules.forEach(mod => {
-        fs.copyFile('node_modules/' + mod, 'client/modules/' + path.basename(mod), err => {
+        fs.copyFile('node_modules/' + mod, 'web/modules/' + path.basename(mod), err => {
             if (err) {throw err;}
         });
     });

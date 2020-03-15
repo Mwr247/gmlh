@@ -17,6 +17,7 @@ const credentials = secure ? {
 const fileTypes = {
     '.html': 'text/html',
     '.js': 'text/javascript',
+    '.mjs': 'text/javascript',
     '.json': 'application/json',
     '.css': 'text/css',
     '.png': 'image/png',
@@ -29,9 +30,9 @@ const server = https.createServer(credentials, (req, res) => {
     let pathname = url.parse(req.url).pathname;
     switch (pathname) {
         case '/':
-        case '/player': pathname = 'client/index.html';break;
-        case '/dm': pathname = 'client/dm.html';break;
-        default: pathname = 'client/' + pathname.replace(/^\//, '');
+        case '/player': pathname = 'web/player/player.html';break;
+        case '/dm': pathname = 'web/dm/dm.html';break;
+        default: pathname = 'web/' + pathname.replace(/^\//, '');
     }
     const ext = path.parse(pathname).ext;
     

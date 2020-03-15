@@ -21,6 +21,7 @@ export class DrawApp {
     
     history = [];
     clients = {};
+    owner = null;
     room = null;
     localId = null;
     cutoff = 2000;
@@ -66,20 +67,22 @@ export class DrawApp {
             this.draw(data);
         }).on('joined', (client, owner, clients) => {
             if (client === this.localId) {
-              this.clients = {};
-              clients.forEach(clientId => this.clients[clientId] = {type: 2, x: 0, y: 0});
-              this.history = [];
-              this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.clients = {};
+                clients.forEach(clientId => this.clients[clientId] = {type: 2, x: 0, y: 0});
+                this.history = [];
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             } else {
-              this.clients[client] = {type: 2, x: 0, y: 0};
+                this.clients[client] = {type: 2, x: 0, y: 0};
+                this.owner = owner;
             }
         }).on('left', (client) => {
             if (client === this.localId) {
-              this.clients = {};
-              this.history = [];
-              this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.clients = {};
+                this.history = [];
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             } else {
-              delete this.clients[client];
+                if (client === this.owner) {this.owner = null;}
+                delete this.clients[client];
             }
         });
         

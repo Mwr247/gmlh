@@ -3,12 +3,12 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=0.5, maximum-scale=0.5, user-scalable=no">
-    <link rel="stylesheet" type="text/css" href="./player.css" />
+    <link rel="stylesheet" type="text/css" href="./player/player.css" />
     <title>GMLH - Player</title>
     <script src="./modules/socket.io.js"></script>
-    <script src="./player.js"></script>
+    <script src="./player/player.js"></script>
     <script type="module">
-        import {DrawApp} from './drawapp.js';
+        import {DrawApp} from './shared/drawapp.mjs';
         var drawApp;
         let url = [window.location.hostname, window.location.port || '4000'].join(':');
         document.addEventListener('DOMContentLoaded', () => {
@@ -16,15 +16,20 @@
         });
         
         function ready() {
-            var colorSelect = document.getElementById('colorSelect');
+            const colorSelect = document.getElementById('colorSelect');
             colorSelect.value = drawApp.markerColor;
             colorSelect.onchange = function() {
                 drawApp.marker(this.value);
             };
+            let begin = document.getElementById('begin');
+            setInterval(() => {
+                begin.style.display = drawApp.owner ? 'none' : 'block';
+            }, 1000)
         }
     </script>
 </head>
 <body>
+    <div id="begin">Waiting for DM to connect...</div>
     <canvas id="GMLH"></canvas>
     <canvas id="drawApp"></canvas>
     <input type="color" id="colorSelect">

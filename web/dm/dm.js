@@ -1,6 +1,6 @@
 // GM's Little Helper
 // Author: Mwr247 (Prismic)
-// Updated:  2020-01-06
+// Updated:  2020-03-13
 
 function GMLH(width, height) {
     const app = new PIXI.Application({ 
@@ -93,13 +93,13 @@ function GMLH(width, height) {
     });
 
     PIXI.Loader.shared.add([
-        'textures/parchment.jpg',
+        'dm/textures/parchment.jpg',
     ]).on('progress', (loader, resource) => {
         console.log('loading:', resource.url);
         console.log('progress:', loader.progress + '%');
     }).load(() => {
         tile = new PIXI.TilingSprite(
-            PIXI.Texture.from('textures/parchment.jpg'),
+            PIXI.Texture.from('dm/textures/parchment.jpg'),
             width,
             height,
         );
@@ -135,18 +135,18 @@ function GMLH(width, height) {
         view.addChild(grid);
 
         const gridLines = new PIXI.Graphics();
-        const gridConst = 50;
+        const gridConst = 200;
         const gridScale = width / gridConst;
         for (let i = 0; i < gridScale; i++) {
             let lw = 1;
             /*if (!(i % (gridConst * 2))) {lw = 4;}
             else if (!(i % (gridConst / 2))) {lw = 3;}
             else if (!(i % (gridConst / 10))) {lw = 2;}*/
-            gridLines.lineStyle(lw, 0x000000, 0.5);
-            gridLines.moveTo(-width / 2, i * gridConst - height / 2);
-            gridLines.lineTo(width / 2, i * gridConst - height / 2);
-            gridLines.moveTo(i * gridConst - width / 2, -height / 2);
-            gridLines.lineTo(i * gridConst - width / 2, height / 2);
+            gridLines.lineStyle(lw, 0x000000, 0.6);
+            gridLines.moveTo(-width / 2 + .5, i * gridConst - height / 2 + .5);
+            gridLines.lineTo(width / 2 + .5, i * gridConst - height / 2 + .5);
+            gridLines.moveTo(i * gridConst - width / 2 + .5, -height / 2 + .5);
+            gridLines.lineTo(i * gridConst - width / 2 + .5, height / 2 + .5);
             gridLines.endFill();
         }
         grid.addChild(gridLines);
