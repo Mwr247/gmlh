@@ -106,3 +106,43 @@ canvas {
     height: 14px;
     width: 35px;
 }
+
+#cursors {
+    margin: 0;
+    border: none;
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 10;
+    opacity: 1;
+    pointer-events: none;
+}
+
+#cursors > div {
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    overflow: visible;
+    opacity: 0;
+    transition: opacity 200ms ease-out;
+}
+
+#cursors > div > div {
+    position: relative;
+    width: 100px;
+    font-weight: bold;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #ddd;
+    text-shadow: 1.5px 1.5px #222;
+    font-size: 14px;
+}
+
+.show {
+    opacity: 1!important;
+}

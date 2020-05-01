@@ -21,6 +21,14 @@
             colorSelect.onchange = function() {
                 drawApp.marker(this.value);
             };
+            const nameInput = document.getElementById('nameInput');
+            nameInput.value = drawApp.localName;
+            nameInput.onchange = function() {
+                drawApp.name(this.value);
+            };
+            nameInput.onmouseout = function() {
+                nameInput.blur();
+            };
             let begin = document.getElementById('begin');
             setInterval(() => {
                 begin.style.display = drawApp.owner ? 'none' : 'block';
@@ -32,6 +40,9 @@
     <div id="begin">Waiting for DM to connect...</div>
     <canvas id="GMLH"></canvas>
     <canvas id="drawApp"></canvas>
-    <input type="color" id="colorSelect">
+    <div id="toolbar">
+        <input type="color" id="colorSelect"><input type="text" id="nameInput" placeholder="Name" maxlength="32" pattern="[-_ A-Za-z0-9]+">
+    </div>
+    <div id="cursors"></div>
 </body>
 </html>

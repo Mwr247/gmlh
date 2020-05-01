@@ -1,12 +1,19 @@
+class Client {
+    constructor(name = '', point = new Point()) {
+        this.name = name;
+        this.point = point
+    }
+};
+
 class Point {
-  constructor(type, x, y, size, color) {
-    this.type = type
-    this.x = x;
-    this.y = y;
-    this.size = size;
-    this.color = color;
-    this.time = Date.now();
-  }
+    constructor(type = 2, x = 0, y = 0, size = 0, color = '#000000') {
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.color = color;
+        this.time = Date.now();
+    }
 };
 
 export class DrawApp {
@@ -18,12 +25,14 @@ export class DrawApp {
     
     tableCanvas = null;
     tableCtx = null;
+    cursors = null;
     
     history = [];
     clients = {};
     owner = null;
     room = null;
     localId = null;
+    localName = '';
     cutoff = 2000;
     resizeTimeout = null;
     
@@ -47,6 +56,7 @@ export class DrawApp {
         this.socket = io.connect(this.url, {transports: ['websocket'], upgrade: false});
         this.canvas = document.getElementById(elementId);
         if (this.canvas == null) {throw new Error('DrawApp: canvas element "' + elementId + '" not detected');}
+        this.cursors = document.getElementById('cursors');
         this.ctx = this.canvas.getContext('2d');
         this.ctx.fillStyle = 'solid';
         setTimeout(() => this.resize(), 60);
@@ -59,36 +69,52 @@ export class DrawApp {
             if (this.room != null) {
                 this.socket.emit(this.host ? 'create' : 'join', this.room);
             }
+            if (!this.host) {
+                this.name(localStorage.getItem('drawName') || 'Player ' + ((Math.random() * 999) | 0) + 1);
+            }
             this.marker(localStorage.getItem('drawColor') || '#' + (Math.random() * 16777215 | 0).toString(16).padStart(6, '0'), this.host ? 8 : 6);
             this.run();
             if (cb) {cb();}
-        }).on('draw', data => {
-            this.history.push([data[0], new Point(data[1].type, data[1].x, data[1].y, data[1].size, data[1].color)]);
-            this.draw(data);
-        }).on('joined', (client, owner, clients) => {
-            if (client === this.localId) {
+        }).on('joined', (clientId, owner, clients) => {
+            if (clientId === this.localId) {
                 this.clients = {};
-                clients.forEach(clientId => this.clients[clientId] = {type: 2, x: 0, y: 0});
+                clients.forEach(clientId2 => {
+                    this.clients[clientId2] = new Client();
+                    this.createCursor(clientId2);
+                });
                 this.history = [];
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             } else {
-                this.clients[client] = {type: 2, x: 0, y: 0};
-                this.owner = owner;
+                this.clients[clientId] = new Client();
+                this.createCursor(clientId);
             }
-        }).on('left', (client) => {
-            if (client === this.localId) {
+            this.owner = owner;
+        }).on('left', (clientId) => {
+            if (clientId === this.localId) {
+                this.clients.forEach(clientId => {
+                    this.deleteCursor(clientId);
+                });
                 this.clients = {};
                 this.history = [];
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
             } else {
-                if (client === this.owner) {this.owner = null;}
-                delete this.clients[client];
+                if (clientId === this.owner) {this.owner = null;}
+                this.deleteCursor(clientId);
+                delete this.clients[clientId];
             }
+        }).on('name', (clientId, name) => {
+            this.clients[clientId].name = name;
+        }).on('cursor', (clientId, point) => {
+            this.clients[clientId].point = new Point(point.type, point.x, point.y, point.size, point.color);
+            this.updateCursor(clientId);
+        }).on('draw', (clientId, point) => {
+            this.history.push([clientId, new Point(point.type, point.x, point.y, point.size, point.color)]);
+            this.draw([clientId, point]);
         });
         
         this.canvas.addEventListener('mousedown', event => this.input(event));
         this.canvas.addEventListener('mousemove', event => this.input(event));
-        this.canvas.addEventListener('mouseup', event => this.input(event));
+        document.addEventListener('mouseup', event => this.input(event));
         this.canvas.addEventListener('touchstart', event => this.input(event));
         this.canvas.addEventListener('touchmove', event => this.input(event));
         this.canvas.addEventListener('touchend', event => this.input(event));
@@ -137,7 +163,6 @@ export class DrawApp {
         this.history = this.history.filter(line => line[1].time > cutoff);
         this.drawHistory(this.history);
         requestAnimationFrame(this.run.bind(this));
-        
     }
     
     draw(data) {
@@ -150,23 +175,21 @@ export class DrawApp {
         this.ctx.strokeStyle = this.ctx.fillStyle = point.color;
         let size = point.size - 1;
         this.ctx.globalAlpha = Math.min(Math.max((point.time - (Date.now() - this.cutoff)) / 500, 0), 1);
-        if (point.type === 0 && this.clients[client].type != null) {
+        if (point.type === 0 && this.clients[client].point.type != null) {
             this.ctx.beginPath();
-            this.ctx.moveTo((this.clients[client].x + this.offset.x) * this.offset.scale, (this.clients[client].y + this.offset.y) * this.offset.scale);
+            this.ctx.moveTo((this.clients[client].point.x + this.offset.x) * this.offset.scale, (this.clients[client].point.y + this.offset.y) * this.offset.scale);
             this.ctx.lineTo((x + this.offset.x) * this.offset.scale, (y + this.offset.y) * this.offset.scale);
             this.ctx.stroke();
         }
         if (this.clients[client] != null) {
-          this.clients[client].type = point.type;
-          this.clients[client].x = x;
-          this.clients[client].y = y;
+          this.clients[client].point = new Point(point.type, x, y, point.size, point.color);
         }
         this.ctx.globalAlpha = 1;
     }
 
     drawHistory(history) {
         Object.values(this.clients).forEach(client => {
-           client.type = null;
+           client.point.type = null;
         });
         history.forEach(data => {
             this.draw(data);
@@ -175,7 +198,6 @@ export class DrawApp {
 
     input(e) {
         if (/^mouse/.test(e.type)) {e.preventDefault();}
-        if (e.type === 'mousemove' && e.buttons !== 1) {return;}
         if (e.touches != null && e.touches.length) {
           e.x = e.touches[0].clientX;
           e.y = e.touches[0].clientY;
@@ -198,15 +220,72 @@ export class DrawApp {
         else if (/down$|start$/.test(e.type)) {type = 1;}
         else if (/up$|end$/.test(e.type)) {type = 2;}
         else {return false;}
-        let point = new Point(type, x / this.offset.scale - this.offsetX - this.offset.x, y / this.offset.scale - this.offsetY - this.offset.y, this.markerSize, this.markerColor)
+        let point = new Point(type, x / this.offset.scale - this.offsetX - this.offset.x, y / this.offset.scale - this.offsetY - this.offset.y, this.markerSize, this.markerColor);
+        this.socket.emit('cursor', point);
+        this.updateCursor(this.localId, point);
+        if (e.type === 'mousemove' && e.buttons !== 1) {return;}
         this.history.push([this.localId, point]);
         this.socket.emit('draw', point);
+    }
+
+    name(name = '') {
+        name = name.replace(/[^-_ A-Za-z0-9]/gi, '').slice(0, 32);
+        this.localName = name;
+        localStorage.setItem('drawName', name);
+        this.socket.emit('name', name);
     }
     
     marker(color, size = 8) {
         this.ctx.strokeStyle = this.ctx.fillStyle = this.markerColor = color;
         this.ctx.lineWidth = this.markerSize = size;
         localStorage.setItem('drawColor', color);
+    }
+
+    createCursor(clientId) {
+        const cursor = document.createElement('div');
+        cursor.id = 'cursor_' + clientId;
+        const client = this.clients[clientId];
+        cursor.style.backgroundColor = client.point.color;
+        cursor.style.left = (client.point.x + this.offsetX - 1) + 'px';
+        cursor.style.top = (client.point.y + this.offsetY - 1) + 'px';
+        const cursorName = document.createElement('div');
+        cursorName.id = 'cursorName_' + clientId;
+        cursorName.innerHTML = clientId === this.owner ? '(DM)' : client.name;
+        cursorName.style.top = (-client.point.size * 2 - 4) + 'px';
+        cursorName.style.right = -client.point.size + 'px';
+        if (clientId === this.localId) {
+            cursorName.style.display = 'none';
+        }
+        cursor.appendChild(cursorName);
+        this.cursors.appendChild(cursor);
+    }
+
+    updateCursor(clientId, point = this.clients[clientId].point) {
+        const cursor = document.getElementById('cursor_' + clientId);
+        if (cursor != null) {
+            const client = this.clients[clientId];
+            cursor.style.backgroundColor = point.color;
+            cursor.style.left = (point.x + this.offsetX - 1) - point.size / 2 + 'px';
+            cursor.style.top = (point.y + this.offsetY - 1) - point.size / 2 + 'px';
+            cursor.style.width = point.size + 'px';
+            cursor.style.height = point.size + 'px';
+            const cursorName = document.getElementById('cursorName_' + clientId);
+            cursorName.innerHTML = clientId === this.owner ? this.localId === this.owner ? '' : '(DM)' : client.name;
+            cursorName.style.top = (-point.size * 2 - 4) + 'px';
+            cursorName.style.right = -point.size + 'px';
+            if (point.type === 2) {
+                cursor.classList.remove('show');
+            } else if (point.type === 1) {
+                cursor.classList.add('show');
+            }
+        }
+    }
+
+    deleteCursor(clientId) {
+        const cursor = document.getElementById('cursor_' + clientId);
+        if (cursor != null) {
+            cursors.removeChild(cursor);
+        }
     }
     
     resize() {

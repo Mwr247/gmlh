@@ -74,6 +74,7 @@ class Room {
 };
 
 const rooms = {};
+const clients = {};
 
 const io = require('socket.io')(server, {
     handlePreflightRequest: (req, res) => {
@@ -87,6 +88,15 @@ const io = require('socket.io')(server, {
     }
 }).set('transports', ['websocket']).on('connection', client => {
     console.log(client.id, 'connected');
+    client.data = clients[client.id] = {
+        id: client.id,
+        client: client,
+        x: 0,
+        y: 0,
+        size: 0,
+        color: '#000000',
+        name: ''
+    };
     
     client.on('create', room => {
         room = String(room);
@@ -103,6 +113,7 @@ const io = require('socket.io')(server, {
         client.join(room);
         io.in(room).clients((err, roomClients) => {
             io.to(room).emit('joined', client.id, rooms[room].owner, roomClients);
+            roomClients.forEach(clientId => client.emit('name', clientId, rooms[room].owner === clientId ? '(DM)' : clients[clientId].name));
         });
     });
     
@@ -117,12 +128,30 @@ const io = require('socket.io')(server, {
         client.join(room);
         io.in(room).clients((err, roomClients) => {
             io.to(room).emit('joined', client.id, rooms[room].owner, roomClients);
+            roomClients.forEach(clientId => client.emit('name', clientId, rooms[room].owner === clientId ? '(DM)' : clients[clientId].name));
         });
+    });
+
+    client.on('name', function(data){
+		client.data.name = data.replace(/[^-_ A-Za-z0-9]/gi, '').slice(0, 32);
+        if (client.room != null) {
+            client.to(client.room).emit('name', client.id, client.data.name);
+        }
+    });
+
+    client.on('cursor', function(data){
+		client.data.x = data.x;
+        client.data.y = data.y;
+        client.data.size = data.size;
+        client.data.color = data.color;
+        if (client.room != null) {
+            client.to(client.room).emit('cursor', client.id, new Point(data.type, data.x, data.y, data.size, data.color));
+        }
     });
 
     client.on('draw', data => {
         if (client.room != null) {
-            client.to(client.room).emit('draw', [client.id, new Point(data.type, data.x, data.y, data.size, data.color)]);
+            client.to(client.room).emit('draw', client.id, new Point(data.type, data.x, data.y, data.size, data.color));
         }
     });
     
@@ -159,6 +188,7 @@ const io = require('socket.io')(server, {
                 }
             });
         }
+        delete clients[client.id];
     });
 });
 
